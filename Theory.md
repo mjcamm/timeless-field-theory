@@ -8,6 +8,8 @@ Please proceed to the final paragraph of the paper.
 
 ## **Core Concept**
 
+From a photon's own reference frame, it has no experience of time - ‘emission’ and ‘absorption’ occur simultaneously according to the photon. This theory takes this insight seriously and builds a framework where photons truly exist in a timeless state.
+
 This theory proposes a fundamental reinterpretation of reality. Instead of proposing a new field existing *within* or *on* spacetime, I am suggesting that the fundamental reality (the "traditional universe itself") is a *result* of our observation of the timeless field. What we perceive and measure as spacetime, along with its contents (particles, forces) and governing principles (like General Relativity and Quantum Mechanics), are proposed to be emergent phenomena. These familiar aspects of our universe arise directly from the interaction between this timeless field and a time-bound observer.
 
 The observer's perception is constructed through a process of "sampling" or "inputting" information from the timeless field, constrained by their inherent, finite processing rate. This interaction shapes the observer's experience, giving rise to the structure of spacetime and the physical laws we deduce.
