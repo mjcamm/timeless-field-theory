@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeless Field Single Slit Experiment Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        canvas {
+            display: block;
+            margin: 20px auto;
+            background-color: #000;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .slider-container label {
+            min-width: 120px;
+        }
+        .explanation {
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+        .chart-container {
+            margin: 20px auto;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .position-info {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        #positionControls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        #positionInput {
+            width: 80px;
+            padding: 5px;
+            text-align: center;
+        }
+        .coherence-meter {
+            width: 100%;
+            max-width: 200px;
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin: 10px auto;
+            overflow: hidden;
+            position: relative;
+        }
+        .coherence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e74c3c 0%, #f39c12 50%, #2ecc71 100%);
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        .coherence-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #333;
+            font-weight: bold;
+            text-shadow: 0 0 2px #fff;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 10px;
+            margin-right: 5px;
+            border-radius: 3px;
+        }
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+        .theory-markers {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 30px;
+            font-size: 11px;
+            color: #555;
+        }
+        .marker {
+            position: relative;
+            text-align: center;
+            width: 1px;
+            background-color: rgba(52, 152, 219, 0.3);
+            height: 10px;
+        }
+        .marker-central {
+            background-color: rgba(46, 204, 113, 0.8);
+            height: 15px;
+        }
+        .marker-min {
+            background-color: rgba(231, 76, 60, 0.5);
+        }
+        .marker-max {
+            background-color: rgba(46, 204, 113, 0.5);
+        }
+        .parameter-display {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .parameter-value {
+            background-color: #f1f9fe;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-left: 5px;
+        }
+        .result-value {
+            background-color: #e8f8f5;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-left: 5px;
+        }
+        .band-indicator {
+            background-color: rgba(46, 204, 113, 0.2);
+            position: absolute;
+            height: 140px;
+            top: 5px;
+        }
+        .central-band {
+            background-color: rgba(46, 204, 113, 0.4);
+        }
+        #presetControls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Timeless Photon Field: Single Slit Experiment</h1>
+        
+        <div class="controls">
+            <button id="startBtn">Start Animation</button>
+            <button id="resetBtn">Reset</button>
+            <button id="speedBtn">10x Speed</button>
+        </div>
+        
+        <div class="slider-container">
+            <label for="slitWidthSlider">Slit Width:</label>
+            <input type="range" id="slitWidthSlider" min="10" max="150" value="40">
+            <span id="slitWidthValue">40</span>
+        </div>
+        
+        <div class="slider-container">
+            <label for="wavelengthSlider">Wavelength:</label>
+            <input type="range" id="wavelengthSlider" min="10" max="50" value="20">
+            <span id="wavelengthValue">20</span>
+        </div>
+        
+        <div id="presetControls">
+            <button id="presetWidth1">Wide Slit</button>
+            <button id="presetWidth2">Narrow Slit</button>
+            <button id="presetLambda1">Long Wavelength</button>
+            <button id="presetLambda2">Short Wavelength</button>
+        </div>
+        
+        <div class="parameter-display">
+            <div>a/λ: <span id="ratioValue" class="parameter-value">2.0</span></div>
+            <div>Central Peak Width: <span id="centralWidthValue" class="result-value">45°</span></div>
+            <div>First Min at: <span id="firstMinValue" class="result-value">±30</span></div>
+        </div>
+        
+        <div id="positionControls">
+            <button id="decreaseBtn">◀</button>
+            <input type="number" id="positionInput" value="0" min="-400" max="400" step="10">
+            <button id="increaseBtn">▶</button>
+            <button id="goToBtn">Go To Position</button>
+        </div>
+        
+        <canvas id="simulationCanvas" width="800" height="400"></canvas>
+        
+        <div class="chart-container">
+            <div class="position-info">
+                Observer Position: <span id="positionValue">0</span>
+                <div class="coherence-meter">
+                    <div id="coherenceFill" class="coherence-fill" style="width: 0%"></div>
+                    <div class="coherence-label">Field Intensity: <span id="coherenceValue">0</span>%</div>
+                </div>
+            </div>
+            <canvas id="waveChart" width="800" height="150"></canvas>
+            <div id="detectionInfo"></div>
+        </div>
+        
+        <canvas id="intensityChart" width="800" height="200"></canvas>
+        <div id="bandMarkers" class="theory-markers"></div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #e74c3c;"></div>
+                <span>Low Intensity</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f39c12;"></div>
+                <span>Medium Intensity</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #2ecc71;"></div>
+                <span>High Intensity</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: rgba(52, 152, 219, 0.5);"></div>
+                <span>Theoretical Curve</span>
+            </div>
+        </div>
+        
+        <div class="explanation">
+            <h2>Processing Horizon Field Sampling</h2>
+            <p>This simulation demonstrates how diffraction emerges naturally in the Timeless Photon Field Theory through multi-point sampling.</p>
+            <ol>
+                <li><strong>Processing Horizon Sampling:</strong> 
+                    <ul>
+                        <li>When the processing horizon intersects the slit, it samples multiple points simultaneously</li>
+                        <li>Each point represents a different path through the timeless field</li>
+                        <li>These multiple sampling paths combine at the detection point</li>
+                    </ul>
+                </li>
+                <li><strong>Path Length Differences:</strong>
+                    <ul>
+                        <li>Each sampling path has a unique total length (observer → slit point → light source)</li>
+                        <li>Path differences create phase relationships between the samples</li>
+                        <li>The colored lines show different paths - red paths are out of phase with green paths</li>
+                    </ul>
+                </li>
+                <li><strong>Phasor Summation:</strong>
+                    <ul>
+                        <li>The phasor diagram (circle near detection) shows how all paths combine</li>
+                        <li>When paths are in phase, the resultant is large (high intensity)</li>
+                        <li>When paths cancel each other, the resultant is small (low intensity)</li>
+                    </ul>
+                </li>
+                <li><strong>Diffraction Bands:</strong>
+                    <ul>
+                        <li>A bright central maximum occurs at position 0</li>
+                        <li>Secondary maxima (dimmer bright bands) appear at regular intervals</li>
+                        <li>Dark bands (minima) occur where path contributions cancel completely</li>
+                        <li>The positions of these bands follow the formula: a·sin(θ) = n·λ (minima when n = ±1, ±2, ...)</li>
+                    </ul>
+                </li>
+            </ol>
+            <p><strong>Key insight:</strong> In the Timeless Photon Field Theory, a single processing horizon samples multiple paths simultaneously. The diffraction pattern with its characteristic bands emerges naturally from how these path samples combine at detection, not from physical waves interfering.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Canvas elements
+            const canvas = document.getElementById('simulationCanvas');
+            const ctx = canvas.getContext('2d');
+            const waveCanvas = document.getElementById('waveChart');
+            const waveCtx = waveCanvas.getContext('2d');
+            const intensityCanvas = document.getElementById('intensityChart');
+            const intensityCtx = intensityCanvas.getContext('2d');
+            const detectionInfo = document.getElementById('detectionInfo');
+            const bandMarkers = document.getElementById('bandMarkers');
+            
+            // UI elements
+            const startBtn = document.getElementById('startBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const speedBtn = document.getElementById('speedBtn');
+            const positionValue = document.getElementById('positionValue');
+            const positionInput = document.getElementById('positionInput');
+            const decreaseBtn = document.getElementById('decreaseBtn');
+            const increaseBtn = document.getElementById('increaseBtn');
+            const goToBtn = document.getElementById('goToBtn');
+            const coherenceFill = document.getElementById('coherenceFill');
+            const coherenceValue = document.getElementById('coherenceValue');
+            const slitWidthSlider = document.getElementById('slitWidthSlider');
+            const slitWidthValue = document.getElementById('slitWidthValue');
+            const wavelengthSlider = document.getElementById('wavelengthSlider');
+            const wavelengthValue = document.getElementById('wavelengthValue');
+            const ratioValue = document.getElementById('ratioValue');
+            const centralWidthValue = document.getElementById('centralWidthValue');
+            const firstMinValue = document.getElementById('firstMinValue');
+            
+            // Preset buttons
+            const presetWidth1 = document.getElementById('presetWidth1');
+            const presetWidth2 = document.getElementById('presetWidth2');
+            const presetLambda1 = document.getElementById('presetLambda1');
+            const presetLambda2 = document.getElementById('presetLambda2');
+            
+            // Constants for the visualization
+            const WIDTH = canvas.width;
+            const HEIGHT = canvas.height;
+            const LIGHT_X = 50;
+            const LIGHT_Y = HEIGHT/2;
+            const SLIT_X = 250;
+            const OBSERVER_X = 700;
+            let SLIT_CENTER_Y = HEIGHT/2;
+            let SLIT_WIDTH = parseInt(slitWidthSlider.value);
+            let WAVELENGTH = parseInt(wavelengthSlider.value);
+            let WAVE_SPEED = 0.5;
+            const NUM_WAVES = 12;
+            let WAVE_SPACING = 30;
+            
+            // Slit geometry
+            let slit = {
+                x: SLIT_X,
+                y: SLIT_CENTER_Y,
+                width: SLIT_WIDTH
+            };
+            
+            // Quantum state oscillation properties
+            const BASE_OSCILLATION_PERIOD = 4000; // ms
+            let OSCILLATION_PERIOD = BASE_OSCILLATION_PERIOD;
+            
+            // Speed control
+            let speedMultiplier = 1;
+            
+            // Observer movement properties
+            let observerOffset = 0;
+            let readyToMove = false;
+            let moveTimer = null;
+            let pauseTimer = null;
+            let isPaused = false;
+            let maxOffset = 400; // Increased to show more of the pattern
+            
+            // Detection tracking
+            const MAX_WAVE_POINTS = 100;
+            let positionWaveData = {};
+            let positionIntensityData = {};
+            let currentWaveData = [];
+            let currentIntensity = 0;
+            let totalDetections = 0;
+            
+            // Track detections for each position
+            let detectionTimes = {};
+            let detectionIntensities = {};
+            let completedPositions = new Set();
+            
+            // Animation state
+            let animationId = null;
+            let waves = [];
+            let isRunning = false;
+            let currentTime = 0;
+            let pulsesReleased = 0;
+            let detectionsForCurrentPosition = 0;
+            
+            // Get current quantum state of light (-1 to 1)
+            function getLightQuantumState() {
+                const time = Date.now();
+                return Math.sin(2 * Math.PI * (time % OSCILLATION_PERIOD) / OSCILLATION_PERIOD);
+            }
+            
+            // Get color based on quantum state
+            function getStateColor(state, opacity = 1) {
+                if (state >= 0) {
+                    // Blue to cyan for positive values
+                    const intensity = Math.floor(255 * state);
+                    return `rgba(0, ${150 + intensity/2}, 255, ${opacity})`;
+                } else {
+                    // Red to orange for negative values
+                    const intensity = Math.floor(255 * -state);
+                    return `rgba(255, ${100 + intensity/2}, 0, ${opacity})`;
+                }
+            }
+            
+            // Get color based on intensity value
+            function getIntensityColor(intensity, opacity = 1) {
+                if (intensity > 0.7) {
+                    // High intensity - green
+                    return `rgba(46, 204, 113, ${opacity})`;
+                } else if (intensity > 0.3) {
+                    // Medium intensity - yellow/orange
+                    return `rgba(243, 156, 18, ${opacity})`;
+                } else {
+                    // Low intensity - red
+                    return `rgba(231, 76, 60, ${opacity})`;
+                }
+            }
+            
+            // Calculate sinc function: sin(x)/x
+            function sinc(x) {
+                if (Math.abs(x) < 0.00001) {
+                    return 1.0; // limit as x approaches 0
+                } else {
+                    return Math.sin(x) / x;
+                }
+            }
+            
+            // Calculate theoretical diffraction intensity based on angle
+            function calculateDiffractionIntensity(position) {
+                // Convert position to angle
+                const observerY = HEIGHT/2 + position;
+                const dx = OBSERVER_X - SLIT_X;
+                const dy = observerY - SLIT_CENTER_Y;
+                const angle = Math.atan2(dy, dx);
+                
+                // Calculate alpha parameter for sinc function
+                // α = (π × a × sin θ) / λ
+                const alpha = (Math.PI * SLIT_WIDTH * Math.sin(angle)) / WAVELENGTH;
+                
+                // Calculate sinc²(α) which gives the intensity
+                const intensity = Math.pow(sinc(alpha), 2);
+                
+                return intensity;
+            }
+            
+            // Calculate positions of theoretical minima and maxima
+            function calculateDiffractionFeatures() {
+                // Calculate ratio of slit width to wavelength
+                const ratio = SLIT_WIDTH / WAVELENGTH;
+                ratioValue.textContent = ratio.toFixed(1);
+                
+                // Calculate angle of first minimum (a·sin(θ) = λ)
+                const firstMinAngle = Math.asin(WAVELENGTH / SLIT_WIDTH);
+                
+                // Convert to position value
+                const dx = OBSERVER_X - SLIT_X;
+                const firstMinPosition = Math.tan(firstMinAngle) * dx;
+                
+                // Update UI
+                const angleInDegrees = (firstMinAngle * 180 / Math.PI).toFixed(0);
+                centralWidthValue.textContent = `${(angleInDegrees * 2).toFixed(0)}°`;
+                firstMinValue.textContent = `±${Math.round(firstMinPosition)}`;
+                
+                // Clear previous markers
+                bandMarkers.innerHTML = '';
+                
+                // Add indicators for central maximum, minima, and secondary maxima
+                const chartWidth = intensityCanvas.width - 60;
+                const minima = [];
+                const maxima = [0]; // Central maximum is always at 0
+                
+                // Calculate positions of minima: a·sin(θ) = n·λ (n = ±1, ±2, ...)
+                for (let n = 1; n <= 5; n++) {
+                    // Skip if minimum angle would be > 90 degrees (impossible)
+                    if (n * WAVELENGTH <= SLIT_WIDTH) {
+                        const minAngle = Math.asin(n * WAVELENGTH / SLIT_WIDTH);
+                        const minPos = Math.tan(minAngle) * dx;
+                        minima.push(minPos);
+                        minima.push(-minPos);
+                    }
+                }
+                
+                // Calculate positions of secondary maxima (approximately between minima)
+                for (let i = 0; i < minima.length - 1; i += 2) {
+                    const avgPos = (minima[i] + minima[i+1]) / 2;
+                    if (Math.abs(avgPos) < maxOffset) {
+                        maxima.push(avgPos);
+                    }
+                }
+                
+                // Sort all positions
+                minima.sort((a, b) => Math.abs(a) - Math.abs(b));
+                maxima.sort((a, b) => Math.abs(a) - Math.abs(b));
+                
+                // Add indicators to the DOM
+                for (let min of minima) {
+                    if (Math.abs(min) <= maxOffset) {
+                        const x = 30 + (min + maxOffset) / (2 * maxOffset) * chartWidth;
+                        const indicator = document.createElement('div');
+                        indicator.className = 'marker marker-min';
+                        indicator.style.left = `${x}px`;
+                        bandMarkers.appendChild(indicator);
+                    }
+                }
+                
+                for (let max of maxima) {
+                    if (Math.abs(max) <= maxOffset) {
+                        const x = 30 + (max + maxOffset) / (2 * maxOffset) * chartWidth;
+                        const indicator = document.createElement('div');
+                        indicator.className = max === 0 ? 'marker marker-central' : 'marker marker-max';
+                        indicator.style.left = `${x}px`;
+                        bandMarkers.appendChild(indicator);
+                    }
+                }
+                
+                // Return features for other functions to use
+                return {
+                    ratio,
+                    firstMinAngle,
+                    firstMinPosition,
+                    minima,
+                    maxima
+                };
+            }
+            
+            // Create a new warped wave based on Huygens-Fresnel principle
+            function createWarpedWave(wave) {
+                // Make a deep copy of the processing horizon wave
+                const warpedWave = {
+                    type: 'warped',
+                    originalRadius: wave.radius,
+                    radius: wave.radius,
+                    opacity: wave.opacity,
+                    observerOffset: wave.observerOffset,
+                    quantumState: wave.quantumState,
+                    creationTime: currentTime,
+                    pulseNumber: wave.pulseNumber,
+                    // Store the slit properties for visualization
+                    slitWidth: SLIT_WIDTH,
+                    slitCenterY: SLIT_CENTER_Y,
+                    // For calculating path differences
+                    wavelength: WAVELENGTH,
+                    // Track the field intensity at different angles
+                    phaseContributions: [],
+                    // Flag to track if the wave has reached the light source
+                    detected: false
+                };
+                
+                return warpedWave;
+            }
+            
+            // Check if wave intersects with the slit and create warped wave if needed
+            function checkSlitIntersection(wave) {
+                if (wave.type !== 'observer' || wave.warpedWaveCreated) {
+                    return false;
+                }
+                
+                // Calculate distance from wave center to slit
+                const dx = slit.x - OBSERVER_X;
+                const dy = slit.y - (HEIGHT/2 + wave.observerOffset);
+                const distance = Math.sqrt(dx*dx + dy*dy);
+                
+                // Check if wave radius is close to the distance to slit
+                const radiusDiff = Math.abs(wave.radius - distance);
+                
+                if (radiusDiff < WAVE_SPEED) {
+                    // Calculate if the wave intersects with the slit
+                    const horizonY = HEIGHT/2 + wave.observerOffset;
+                    const horizonRadius = wave.radius;
+                    
+                    // Calculate circle-line intersection with slit plane
+                    const offsetX = SLIT_X - OBSERVER_X;
+                    const discriminant = Math.pow(horizonRadius, 2) - Math.pow(offsetX, 2);
+                    
+                    // No intersection if discriminant is negative
+                    if (discriminant < 0) {
+                        return false;
+                    }
+                    
+                    // Calculate the two possible y values
+                    const sqrtDiscriminant = Math.sqrt(discriminant);
+                    const intersectY1 = horizonY - sqrtDiscriminant;
+                    const intersectY2 = horizonY + sqrtDiscriminant;
+                    
+                    // Calculate top and bottom of slit
+                    const halfSlit = SLIT_WIDTH / 2;
+                    const slitTop = SLIT_CENTER_Y - halfSlit;
+                    const slitBottom = SLIT_CENTER_Y + halfSlit;
+                    
+                    // Check if any part of the wave intersects the slit
+                    const topIntersect = Math.max(intersectY1, slitTop);
+                    const bottomIntersect = Math.min(intersectY2, slitBottom);
+                    
+                    if (topIntersect <= bottomIntersect) {
+                        // Mark that we've created a warped wave for this observer wave
+                        wave.warpedWaveCreated = true;
+                        
+                        // Create warped wave
+                        const warpedWave = createWarpedWave(wave);
+                        waves.push(warpedWave);
+                        
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+            
+            // Calculate complex phasor sum for intensity at a given angle
+            function calculatePhaseSum(warpedWave, angleToTarget) {
+                const waveCenter = HEIGHT/2 + warpedWave.observerOffset;
+                const halfSlit = warpedWave.slitWidth / 2;
+                const slitTop = warpedWave.slitCenterY - halfSlit;
+                const slitBottom = warpedWave.slitCenterY + halfSlit;
+                
+                // Number of points to sample along the slit
+                const numPoints = 50;
+                const slitStep = warpedWave.slitWidth / numPoints;
+                
+                // Calculate path from observer to each point in slit to target
+                let realSum = 0;
+                let imagSum = 0;
+                
+                // Store all path contributions for visualization
+                warpedWave.pathContributions = [];
+                
+                for (let i = 0; i <= numPoints; i++) {
+                    const slitY = slitTop + i * slitStep;
+                    
+                    // Calculate path from observer to this slit point
+                    const dx1 = SLIT_X - OBSERVER_X;
+                    const dy1 = slitY - waveCenter;
+                    const path1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+                    
+                    // Calculate path from this slit point to target
+                    const targetY = LIGHT_Y; 
+                    const dx2 = LIGHT_X - SLIT_X;
+                    const dy2 = targetY - slitY;
+                    const path2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+                    
+                    // Total path length 
+                    const totalPath = path1 + path2;
+                    
+                    // Calculate phase based on path difference (in radians)
+                    // φ = 2π × path / λ
+                    const phase = (2 * Math.PI * totalPath) / warpedWave.wavelength;
+                    
+                    // Add contribution from this point as complex number (phasor)
+                    // Using Euler's formula: e^(iφ) = cos(φ) + i·sin(φ)
+                    const real = Math.cos(phase);
+                    const imag = Math.sin(phase);
+                    
+                    realSum += real;
+                    imagSum += imag;
+                    
+                    // Store this contribution for visualization
+                    warpedWave.pathContributions.push({
+                        slitY: slitY,
+                        phase: phase,
+                        real: real,
+                        imag: imag,
+                        totalPath: totalPath
+                    });
+                }
+                
+                // Normalize the sum by number of points
+                realSum /= (numPoints + 1);
+                imagSum /= (numPoints + 1);
+                
+                // Calculate magnitude squared (intensity)
+                const intensity = (realSum * realSum) + (imagSum * imagSum);
+                
+                // Store the phasor sum for visualization
+                warpedWave.phasorSum = {
+                    real: realSum,
+                    imag: imagSum,
+                    magnitude: Math.sqrt(realSum * realSum + imagSum * imagSum)
+                };
+                
+                // Scale by quantum state
+                return intensity * Math.pow(warpedWave.quantumState, 2);
+            }
+            
+            function updateWaves() {
+                // Update wave positions
+                waves.forEach(wave => {
+                    // Update radius for all wave types
+                    wave.radius += WAVE_SPEED;
+                    
+                    // Fade out as radius increases
+                    wave.opacity = 1 - (wave.radius / (WIDTH * 1.2));
+                    
+                    // For observer waves, check intersection with slit
+                    if (wave.type === 'observer' && !wave.warpedWaveCreated) {
+                        checkSlitIntersection(wave);
+                    }
+                    
+                    // For warped waves, check if they've reached the light source
+                    if (wave.type === 'warped' && !wave.detected) {
+                        // Calculate distance from light source
+                        const dx = LIGHT_X - OBSERVER_X;
+                        const dy = LIGHT_Y - (HEIGHT/2 + wave.observerOffset);
+                        const distanceToLight = Math.sqrt(dx*dx + dy*dy);
+                        
+                        // Check if wave has reached the light
+                        if (Math.abs(wave.radius - distanceToLight) < WAVE_SPEED) {
+                            // Mark as detected
+                            wave.detected = true;
+                            
+                            // Calculate angle to light source
+                            const angleToLight = Math.atan2(dy, dx);
+                            
+                            // Calculate intensity using phase-based approach
+                            const intensity = calculatePhaseSum(wave, angleToLight);
+                            
+                            // Record detection for this position
+                            const posKey = Math.round(wave.observerOffset).toString();
+                            if (!detectionTimes[posKey]) {
+                                detectionTimes[posKey] = [];
+                                detectionIntensities[posKey] = [];
+                            }
+                            
+                            // Add detection time and intensity
+                            detectionTimes[posKey].push(currentTime);
+                            detectionIntensities[posKey].push(intensity);
+                            
+                            // Limit arrays
+                            if (detectionTimes[posKey].length > 50) {
+                                detectionTimes[posKey].shift();
+                                detectionIntensities[posKey].shift();
+                            }
+                            
+                            // Update for current position
+                            if (Math.round(wave.observerOffset) === Math.round(observerOffset)) {
+                                detectionsForCurrentPosition++;
+                                
+                                // Calculate average intensity if we have enough detections
+                                if (detectionIntensities[posKey].length > 0) {
+                                    const sum = detectionIntensities[posKey].reduce((a, b) => a + b, 0);
+                                    currentIntensity = sum / detectionIntensities[posKey].length;
+                                    positionIntensityData[posKey] = currentIntensity;
+                                    
+                                    // Update intensity meter
+                                    coherenceFill.style.width = `${currentIntensity * 100}%`;
+                                    coherenceValue.textContent = (currentIntensity * 100).toFixed(0);
+                                }
+                                
+                                // Add to current wave data
+                                currentWaveData.push({
+                                    time: currentTime,
+                                    value: wave.quantumState,
+                                    intensity: intensity,
+                                    phasorSum: wave.phasorSum ? {...wave.phasorSum} : null
+                                });
+                                
+                                // Limit array size
+                                if (currentWaveData.length > MAX_WAVE_POINTS) {
+                                    currentWaveData.shift();
+                                }
+                                
+                                // Visual flash effect - use intensity color
+                                const color = getIntensityColor(intensity, 0.7);
+                                ctx.fillStyle = color;
+                                ctx.beginPath();
+                                ctx.arc(LIGHT_X, LIGHT_Y, 15, 0, Math.PI * 2);
+                                ctx.fill();
+                                
+                                // Draw phasor diagram display at detection point
+                                if (wave.phasorSum) {
+                                    const phasorScale = 25;
+                                    const phasorCenterX = LIGHT_X + 60;
+                                    const phasorCenterY = LIGHT_Y;
+                                    
+                                    // Draw phasor circle background
+                                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                                    ctx.beginPath();
+                                    ctx.arc(phasorCenterX, phasorCenterY, phasorScale + 5, 0, Math.PI * 2);
+                                    ctx.fill();
+                                    
+                                    // Draw phasor circle outline
+                                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                                    ctx.lineWidth = 1;
+                                    ctx.beginPath();
+                                    ctx.arc(phasorCenterX, phasorCenterY, phasorScale, 0, Math.PI * 2);
+                                    ctx.stroke();
+                                    
+                                    // Draw axes
+                                    ctx.beginPath();
+                                    ctx.moveTo(phasorCenterX - phasorScale, phasorCenterY);
+                                    ctx.lineTo(phasorCenterX + phasorScale, phasorCenterY);
+                                    ctx.moveTo(phasorCenterX, phasorCenterY - phasorScale);
+                                    ctx.lineTo(phasorCenterX, phasorCenterY + phasorScale);
+                                    ctx.stroke();
+                                    
+                                    // Draw individual path contributions
+                                    if (wave.pathContributions) {
+                                        for (const path of wave.pathContributions) {
+                                            // Draw with very low opacity
+                                            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+                                            ctx.lineWidth = 0.5;
+                                            ctx.beginPath();
+                                            ctx.moveTo(phasorCenterX, phasorCenterY);
+                                            ctx.lineTo(
+                                                phasorCenterX + path.real * phasorScale * 0.8, 
+                                                phasorCenterY - path.imag * phasorScale * 0.8
+                                            );
+                                            ctx.stroke();
+                                        }
+                                    }
+                                    
+                                    // Draw resultant phasor
+                                    const phasorEndX = phasorCenterX + wave.phasorSum.real * phasorScale;
+                                    const phasorEndY = phasorCenterY - wave.phasorSum.imag * phasorScale;
+                                    
+                                    ctx.strokeStyle = 'rgba(46, 204, 113, 0.9)';
+                                    ctx.lineWidth = 2;
+                                    ctx.beginPath();
+                                    ctx.moveTo(phasorCenterX, phasorCenterY);
+                                    ctx.lineTo(phasorEndX, phasorEndY);
+                                    ctx.stroke();
+                                    
+                                    // Draw arrowhead
+                                    ctx.fillStyle = 'rgba(46, 204, 113, 1)';
+                                    ctx.beginPath();
+                                    ctx.arc(phasorEndX, phasorEndY, 3, 0, Math.PI * 2);
+                                    ctx.fill();
+                                    
+                                    // Label
+                                    ctx.fillStyle = 'white';
+                                    ctx.font = '12px Arial';
+                                    ctx.fillText(`Resultant`, phasorCenterX - 30, phasorCenterY - phasorScale - 15);
+                                    ctx.fillText(`Mag: ${wave.phasorSum.magnitude.toFixed(2)}`, phasorCenterX - 30, phasorCenterY - phasorScale - 2);
+                                }
+                                
+                                // High intensity effect - white border
+                                if (intensity > 0.7) {
+                                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                                    ctx.lineWidth = 3;
+                                    ctx.stroke();
+                                }
+                                
+                                // Update wave chart
+                                updateWaveChart();
+                                
+                                // Update intensity chart occasionally
+                                totalDetections++;
+                                if (totalDetections % 5 === 0) {
+                                    updateIntensityChart();
+                                }
+                            }
+                        } else if (wave.radius > SLIT_X - OBSERVER_X && !wave.pathsCalculated) {
+                            // Calculate path contributions as soon as wave passes through slit
+                            // This allows us to visualize them before detection
+                            wave.pathsCalculated = true;
+                            
+                            // Calculate angle to light source
+                            const dy = LIGHT_Y - (HEIGHT/2 + wave.observerOffset);
+                            const dx = LIGHT_X - OBSERVER_X;
+                            const angleToLight = Math.atan2(dy, dx);
+                            
+                            // Pre-calculate phase contributions
+                            calculatePhaseSum(wave, angleToLight);
+                        }
+                    }
+                });
+                
+                // Remove completely faded waves
+                waves = waves.filter(wave => wave.opacity > 0);
+            }
+            
+            function drawBackground() {
+                // Clear canvas
+                ctx.fillStyle = '#111';
+                ctx.fillRect(0, 0, WIDTH, HEIGHT);
+                
+                // Draw stationary light point with color based on quantum state
+                const currentState = getLightQuantumState();
+                const stateColor = getStateColor(currentState);
+                ctx.fillStyle = stateColor;
+                ctx.beginPath();
+                ctx.arc(LIGHT_X, LIGHT_Y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw a ring around the light to show it's active
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(LIGHT_X, LIGHT_Y, 12, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Draw quantum state value
+                ctx.fillStyle = 'white';
+                ctx.font = '12px Arial';
+                ctx.fillText(`State: ${currentState.toFixed(2)}`, LIGHT_X - 20, LIGHT_Y - 20);
+                
+                // Draw barrier with single slit
+                ctx.fillStyle = '#95a5a6';
+                const halfSlit = SLIT_WIDTH / 2;
+                ctx.fillRect(SLIT_X - 5, 0, 10, SLIT_CENTER_Y - halfSlit);
+                ctx.fillRect(SLIT_X - 5, SLIT_CENTER_Y + halfSlit, 10, HEIGHT - (SLIT_CENTER_Y + halfSlit));
+                
+                // Highlight slit with a subtle glow
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.fillRect(SLIT_X - 5, SLIT_CENTER_Y - halfSlit, 10, SLIT_WIDTH);
+                
+                // Draw wavelength indicator
+                ctx.fillStyle = 'rgba(52, 152, 219, 0.7)';
+                ctx.font = '12px Arial';
+                ctx.fillText(`λ: ${WAVELENGTH}px`, SLIT_X + 10, SLIT_CENTER_Y - halfSlit - 10);
+                
+                // Draw slit width indicator
+                ctx.strokeStyle = 'rgba(52, 152, 219, 0.5)';
+                ctx.beginPath();
+                ctx.moveTo(SLIT_X - 15, SLIT_CENTER_Y - halfSlit);
+                ctx.lineTo(SLIT_X - 15, SLIT_CENTER_Y + halfSlit);
+                ctx.stroke();
+                
+                ctx.fillStyle = 'rgba(52, 152, 219, 0.7)';
+                ctx.beginPath();
+                ctx.arc(SLIT_X - 15, SLIT_CENTER_Y - halfSlit, 2, 0, Math.PI * 2);
+                ctx.arc(SLIT_X - 15, SLIT_CENTER_Y + halfSlit, 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillText(`a: ${SLIT_WIDTH}px`, SLIT_X - 40, SLIT_CENTER_Y);
+                
+                // Only draw observer if it's within the visible canvas
+                const observerCenterY = HEIGHT/2 + observerOffset;
+                if (observerCenterY >= -20 && observerCenterY <= HEIGHT+20) {
+                    // Draw observer position (where processing horizons originate)
+                    ctx.fillStyle = '#3498db';
+                    ctx.fillRect(OBSERVER_X, observerCenterY - 20, 3, 40);
+                    
+                    // Visual indicator for different states
+                    if (isPaused) {
+                        // Yellow when in pause state after movement
+                        ctx.fillStyle = 'rgba(241, 196, 15, 0.7)';
+                        ctx.beginPath();
+                        ctx.arc(OBSERVER_X + 15, observerCenterY, 10, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else {
+                        // Green when emitting pulses
+                        ctx.fillStyle = 'rgba(46, 204, 113, 0.7)';
+                        ctx.beginPath();
+                        ctx.arc(OBSERVER_X + 15, observerCenterY, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    
+                    // Display pulse count, position, and state information if within view
+                    ctx.fillStyle = 'white';
+                    ctx.font = '12px Arial';
+                    
+                    let stateText = "Emitting";
+                    if (isPaused) stateText = `Paused (${3/speedMultiplier}s)`;
+                    else if (readyToMove) stateText = "Ready to move";
+                    
+                    ctx.fillText(`State: ${stateText}`, OBSERVER_X + 25, observerCenterY);
+                    ctx.fillText(`Pulses: ${pulsesReleased}/${NUM_WAVES}`, OBSERVER_X + 25, observerCenterY + 15);
+                    ctx.fillText(`Position: ${Math.round(observerOffset)}`, OBSERVER_X + 25, observerCenterY + 30);
+                    ctx.fillText(`Speed: ${speedMultiplier}x`, OBSERVER_X + 25, observerCenterY + 45);
+                    ctx.fillText(`Detections: ${detectionsForCurrentPosition}`, OBSERVER_X + 25, observerCenterY + 60);
+                    ctx.fillText(`Intensity: ${(currentIntensity * 100).toFixed(0)}%`, OBSERVER_X + 25, observerCenterY + 75);
+                    
+                    // Calculate and show theoretical intensity at this position
+                    const theoreticalIntensity = calculateDiffractionIntensity(observerOffset);
+                    ctx.fillText(`Theory: ${(theoreticalIntensity * 100).toFixed(0)}%`, OBSERVER_X + 25, observerCenterY + 90);
+                    
+                    // Show diffraction band info
+                    const features = calculateDiffractionFeatures();
+                    // Calculate distance from nearest min/max
+                    let nearestMin = Infinity;
+                    for (const min of features.minima) {
+                        if (Math.abs(min - observerOffset) < Math.abs(nearestMin)) {
+                            nearestMin = min - observerOffset;
+                        }
+                    }
+                    
+                    let nearestMax = Infinity;
+                    for (const max of features.maxima) {
+                        if (Math.abs(max - observerOffset) < Math.abs(nearestMax)) {
+                            nearestMax = max - observerOffset;
+                        }
+                    }
+                    
+                    let bandInfo = "";
+                    if (Math.abs(nearestMax) < Math.abs(nearestMin) && Math.abs(nearestMax) < 10) {
+                        bandInfo = nearestMax === 0 ? "Central Maximum" : "Secondary Maximum";
+                    } else if (Math.abs(nearestMin) < 10) {
+                        bandInfo = "Minimum (Dark Band)";
+                    }
+                    
+                    if (bandInfo) {
+                        ctx.fillText(bandInfo, OBSERVER_X + 25, observerCenterY + 105);
+                    }
+                } else {
+                    // If observer is off-screen, show an indicator of its direction
+                    ctx.fillStyle = '#3498db';
+                    const arrowY = observerOffset > 0 ? HEIGHT - 20 : 20;
+                    ctx.beginPath();
+                    ctx.moveTo(OBSERVER_X, arrowY);
+                    ctx.lineTo(OBSERVER_X + 15, arrowY);
+                    ctx.lineTo(OBSERVER_X + 7.5, observerOffset > 0 ? HEIGHT - 5 : 5);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Show position text
+                    ctx.fillStyle = 'white';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(`Position: ${Math.round(observerOffset)}`, OBSERVER_X + 25, arrowY + 5);
+                    ctx.fillText(`Speed: ${speedMultiplier}x`, OBSERVER_X + 25, arrowY + 20);
+                }
+            }
+            
+            function drawWaves() {
+                waves.forEach(wave => {
+                    if (wave.type === 'observer') {
+                        // Draw observer processing horizons - expanding circles
+                        const centerY = HEIGHT/2 + wave.observerOffset;
+                        
+                        // Only draw if within visible canvas
+                        if (centerY >= -wave.radius && centerY <= HEIGHT + wave.radius) {
+                            ctx.beginPath();
+                            ctx.arc(OBSERVER_X, centerY, wave.radius, 0, Math.PI * 2);
+                            ctx.strokeStyle = `rgba(52, 152, 219, ${wave.opacity})`;
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                            
+                            // Show the recorded quantum state in the wave
+                            if (wave.radius > 30) {
+                                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                                ctx.font = '10px Arial';
+                                ctx.fillText(wave.quantumState.toFixed(2), 
+                                           OBSERVER_X - wave.radius + 5, 
+                                           centerY);
+                                
+                                // Show detection count
+                                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                                ctx.font = '8px Arial';
+                                ctx.fillText(`#${wave.pulseNumber}`, 
+                                           OBSERVER_X - wave.radius + 5, 
+                                           centerY + 12);
+                            }
+                        }
+                    } else if (wave.type === 'warped') {
+                        // Draw warped wave
+                        const centerY = HEIGHT/2 + wave.observerOffset;
+                        
+                        // Only draw if within visible canvas with proper opacity
+                        if (centerY >= -wave.radius && centerY <= HEIGHT + wave.radius && wave.opacity > 0.05) {
+                            // Draw warped wave as a partial circle
+                            // Calculate top and bottom of slit
+                            const halfSlit = wave.slitWidth / 2;
+                            const slitTop = wave.slitCenterY - halfSlit;
+                            const slitBottom = wave.slitCenterY + halfSlit;
+                            
+                            // Calculate angles for slit edges
+                            const topAngle = Math.atan2(slitTop - centerY, SLIT_X - OBSERVER_X);
+                            const bottomAngle = Math.atan2(slitBottom - centerY, SLIT_X - OBSERVER_X);
+                            
+                            // Draw arc for the portion that passes through slit
+                            ctx.beginPath();
+                            ctx.arc(OBSERVER_X, centerY, wave.radius, topAngle, bottomAngle);
+                            ctx.strokeStyle = getStateColor(wave.quantumState, wave.opacity);
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                            
+                            // Draw path contributions and phase relationships
+                            if (wave.radius > SLIT_X - OBSERVER_X && wave.pathContributions) {
+                                // Draw the individual path contributions
+                                const pathsToShow = Math.min(wave.pathContributions.length, 21); // Show a reasonable number
+                                const pathStep = Math.floor(wave.pathContributions.length / pathsToShow);
+                                
+                                // Draw phase paths from the slit to the light source
+                                for (let i = 0; i < wave.pathContributions.length; i += pathStep) {
+                                    const pathInfo = wave.pathContributions[i];
+                                    
+                                    // Determine path color based on phase
+                                    // Use cosine of phase to get colors that indicate constructive/destructive interference
+                                    const phaseValue = Math.cos(pathInfo.phase);
+                                    let pathColor;
+                                    
+                                    if (phaseValue > 0.5) {
+                                        // Strong constructive - bright green
+                                        pathColor = `rgba(46, 204, 113, ${wave.opacity * 0.6})`;
+                                    } else if (phaseValue > 0) {
+                                        // Weak constructive - light green
+                                        pathColor = `rgba(46, 204, 113, ${wave.opacity * 0.3})`;
+                                    } else if (phaseValue > -0.5) {
+                                        // Weak destructive - light red
+                                        pathColor = `rgba(231, 76, 60, ${wave.opacity * 0.3})`;
+                                    } else {
+                                        // Strong destructive - bright red
+                                        pathColor = `rgba(231, 76, 60, ${wave.opacity * 0.6})`;
+                                    }
+                                    
+                                    // Draw line from observer to slit point
+                                    ctx.beginPath();
+                                    ctx.moveTo(OBSERVER_X, centerY);
+                                    ctx.lineTo(SLIT_X, pathInfo.slitY);
+                                    ctx.strokeStyle = `rgba(255, 255, 255, ${wave.opacity * 0.1})`;
+                                    ctx.lineWidth = 0.5;
+                                    ctx.stroke();
+                                    
+                                    // Draw line from slit point to light source with phase color
+                                    ctx.beginPath();
+                                    ctx.moveTo(SLIT_X, pathInfo.slitY);
+                                    ctx.lineTo(LIGHT_X, LIGHT_Y);
+                                    ctx.strokeStyle = pathColor;
+                                    ctx.lineWidth = 1;
+                                    ctx.stroke();
+                                    
+                                    // Mark slit point with phase indicator
+                                    ctx.fillStyle = pathColor;
+                                    ctx.beginPath();
+                                    ctx.arc(SLIT_X, pathInfo.slitY, 2, 0, Math.PI * 2);
+                                    ctx.fill();
+                                }
+                                
+                                // If the wave has reached a detection radius, draw the phasor diagram
+                                const dx = LIGHT_X - OBSERVER_X;
+                                const dy = LIGHT_Y - centerY;
+                                const distanceToLight = Math.sqrt(dx*dx + dy*dy);
+                                
+                                if (Math.abs(wave.radius - distanceToLight) < 50 && wave.phasorSum) {
+                                    // Draw phasor diagram at the light source
+                                    const phasorScale = 20; // Scale factor for phasor visualization
+                                    const phasorX = LIGHT_X + 30;
+                                    const phasorY = LIGHT_Y - 20;
+                                    
+                                    // Draw phasor diagram background
+                                    ctx.fillStyle = `rgba(0, 0, 0, ${wave.opacity * 0.7})`;
+                                    ctx.beginPath();
+                                    ctx.arc(phasorX, phasorY, phasorScale + 5, 0, Math.PI * 2);
+                                    ctx.fill();
+                                    
+                                    // Draw axes
+                                    ctx.strokeStyle = `rgba(255, 255, 255, ${wave.opacity * 0.5})`;
+                                    ctx.lineWidth = 0.5;
+                                    ctx.beginPath();
+                                    ctx.moveTo(phasorX - phasorScale, phasorY);
+                                    ctx.lineTo(phasorX + phasorScale, phasorY);
+                                    ctx.moveTo(phasorX, phasorY - phasorScale);
+                                    ctx.lineTo(phasorX, phasorY + phasorScale);
+                                    ctx.stroke();
+                                    
+                                    // Draw resultant phasor
+                                    const phasorEndX = phasorX + wave.phasorSum.real * phasorScale;
+                                    const phasorEndY = phasorY - wave.phasorSum.imag * phasorScale;
+                                    
+                                    ctx.strokeStyle = `rgba(46, 204, 113, ${wave.opacity * 0.9})`;
+                                    ctx.lineWidth = 2;
+                                    ctx.beginPath();
+                                    ctx.moveTo(phasorX, phasorY);
+                                    ctx.lineTo(phasorEndX, phasorEndY);
+                                    ctx.stroke();
+                                    
+                                    // Draw arrowhead
+                                    ctx.fillStyle = `rgba(46, 204, 113, ${wave.opacity})`;
+                                    ctx.beginPath();
+                                    ctx.arc(phasorEndX, phasorEndY, 3, 0, Math.PI * 2);
+                                    ctx.fill();
+                                    
+                                    // Show magnitude
+                                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                                    ctx.font = '10px Arial';
+                                    ctx.fillText(`Magnitude: ${wave.phasorSum.magnitude.toFixed(2)}`, 
+                                                phasorX - 40, phasorY + phasorScale + 15);
+                                }
+                            }
+                            
+                            // Show wave information
+                            if (wave.radius > 30) {
+                                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                                ctx.font = '8px Arial';
+                                ctx.fillText(`#${wave.pulseNumber} (processing)`, 
+                                           OBSERVER_X - wave.radius + 5, 
+                                           centerY + 12);
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function updateWaveChart() {
+                // Clear wave chart
+                waveCtx.fillStyle = '#f9f9f9';
+                waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
+                
+                if (currentWaveData.length === 0) return;
+                
+                // Update position display
+                positionValue.textContent = Math.round(observerOffset);
+                positionInput.value = Math.round(observerOffset);
+                
+                // Update intensity meter
+                coherenceFill.style.width = `${currentIntensity * 100}%`;
+                coherenceValue.textContent = (currentIntensity * 100).toFixed(0);
+                
+                // Draw grid
+                waveCtx.strokeStyle = '#ddd';
+                waveCtx.lineWidth = 1;
+                
+                // Draw horizontal grid lines
+                waveCtx.beginPath();
+                const hLines = 5;
+                for (let i = 0; i <= hLines; i++) {
+                    const y = waveCanvas.height * i / hLines;
+                    waveCtx.moveTo(0, y);
+                    waveCtx.lineTo(waveCanvas.width, y);
+                }
+                waveCtx.stroke();
+                
+                // Draw center line
+                waveCtx.strokeStyle = '#aaa';
+                waveCtx.beginPath();
+                waveCtx.moveTo(0, waveCanvas.height / 2);
+                waveCtx.lineTo(waveCanvas.width, waveCanvas.height / 2);
+                waveCtx.stroke();
+                
+                // Draw two lines - one for raw quantum state, one for modulated amplitude
+                
+                // First draw the raw quantum state with lower opacity
+                waveCtx.strokeStyle = 'rgba(52, 152, 219, 0.3)'; // Light blue
+                waveCtx.lineWidth = 1.5;
+                waveCtx.beginPath();
+                
+                const pointWidth = waveCanvas.width / MAX_WAVE_POINTS;
+                currentWaveData.forEach((point, i) => {
+                    const x = pointWidth * i;
+                    const y = waveCanvas.height / 2 - (point.value * waveCanvas.height / 2 * 0.8);
+                    
+                    if (i === 0) {
+                        waveCtx.moveTo(x, y);
+                    } else {
+                        waveCtx.lineTo(x, y);
+                    }
+                });
+                
+                waveCtx.stroke();
+                
+                // Now draw the intensity-modulated amplitude (the "experienced" wave)
+                waveCtx.strokeStyle = '#e74c3c'; // Red
+                waveCtx.lineWidth = 2;
+                waveCtx.beginPath();
+                
+                currentWaveData.forEach((point, i) => {
+                    const x = pointWidth * i;
+                    // Calculate modulated amplitude by multiplying raw value by square root of intensity
+                    const modulatedValue = point.value * Math.sqrt(point.intensity || 0);
+                    const y = waveCanvas.height / 2 - (modulatedValue * waveCanvas.height / 2 * 0.8);
+                    
+                    if (i === 0) {
+                        waveCtx.moveTo(x, y);
+                    } else {
+                        waveCtx.lineTo(x, y);
+                    }
+                    
+                    // Add dots for each point
+                    waveCtx.fillStyle = getIntensityColor(point.intensity || 0.5, 0.7);
+                    waveCtx.beginPath();
+                    waveCtx.arc(x, y, 3, 0, Math.PI * 2);
+                    waveCtx.fill();
+                });
+                
+                waveCtx.stroke();
+                
+                // Add a legend for the two lines
+                waveCtx.fillStyle = 'rgba(52, 152, 219, 0.7)';
+                waveCtx.beginPath();
+                waveCtx.fillRect(waveCanvas.width - 180, 5, 15, 2);
+                waveCtx.fill();
+                
+                waveCtx.fillStyle = '#333';
+                waveCtx.font = '10px Arial';
+                waveCtx.fillText('Raw Quantum State', waveCanvas.width - 160, 8);
+                
+                waveCtx.fillStyle = 'rgba(231, 76, 60, 0.7)';
+                waveCtx.beginPath();
+                waveCtx.fillRect(waveCanvas.width - 180, 20, 15, 2);
+                waveCtx.fill();
+                
+                waveCtx.fillStyle = '#333';
+                waveCtx.font = '10px Arial';
+                waveCtx.fillText('Experienced Wave (Modulated)', waveCanvas.width - 160, 23);
+                
+                // Draw axis labels
+                waveCtx.fillStyle = '#333';
+                waveCtx.font = '10px Arial';
+                waveCtx.fillText('-1', 5, waveCanvas.height - 5);
+                waveCtx.fillText('0', 5, waveCanvas.height / 2);
+                waveCtx.fillText('+1', 5, 15);
+                waveCtx.fillText('Quantum State Detected Over Time at Position ' + Math.round(observerOffset), 
+                                waveCanvas.width / 2 - 120, 15);
+                
+                // Update detection info display
+                const posKey = Math.round(observerOffset).toString();
+                if (detectionTimes[posKey] && detectionTimes[posKey].length > 0) {
+                    const times = detectionTimes[posKey];
+                    const intensities = detectionIntensities[posKey] || [];
+                    // Display only most recent 10 detections to avoid overflow
+                    const displayCount = Math.min(times.length, 10);
+                    const displayTimes = times.slice(-displayCount);
+                    const displayIntensities = intensities.slice(-displayCount);
+                    
+                    // Calculate intervals
+                    let intervalsHTML = '';
+                    if (displayTimes.length >= 2) {
+                        intervalsHTML = 'Intervals: ';
+                        for (let i = 1; i < displayTimes.length; i++) {
+                            const interval = (displayTimes[i] - displayTimes[i-1]).toFixed(0);
+                            intervalsHTML += `${interval}ms `;
+                        }
+                    }
+                    
+                    // Format intensities
+                    let intensitiesHTML = '';
+                    if (displayIntensities.length > 0) {
+                        intensitiesHTML = 'Intensities: ';
+                        for (let i = 0; i < displayIntensities.length; i++) {
+                            const intPercent = (displayIntensities[i] * 100).toFixed(0);
+                            intensitiesHTML += `${intPercent}% `;
+                        }
+                    }
+                    
+                    detectionInfo.innerHTML = `
+                        <small>Latest Detections: ${displayTimes.map(t => (t % 10000).toFixed(0)).join(', ')}<br>
+                        ${intervalsHTML}<br>
+                        ${intensitiesHTML}</small>
+                    `;
+                } else {
+                    detectionInfo.innerHTML = '<small>No detections yet at this position</small>';
+                }
+            }
+            
+            function updateIntensityChart() {
+                // Clear intensity chart
+                intensityCtx.fillStyle = '#fff';
+                intensityCtx.fillRect(0, 0, intensityCanvas.width, intensityCanvas.height);
+                
+                if (Object.keys(positionIntensityData).length === 0) return;
+                
+                // Draw chart title
+                intensityCtx.fillStyle = '#2c3e50';
+                intensityCtx.font = '14px Arial';
+                intensityCtx.fillText('Field Intensity by Observer Position (Diffraction Pattern)', 10, 15);
+                
+                // Calculate scaling
+                const chartHeight = intensityCanvas.height - 30;
+                const chartWidth = intensityCanvas.width - 60;
+                
+                // Draw grid lines
+                intensityCtx.strokeStyle = '#eee';
+                intensityCtx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    const y = 20 + (chartHeight * i / 4);
+                    intensityCtx.moveTo(30, y);
+                    intensityCtx.lineTo(intensityCanvas.width - 30, y);
+                }
+                intensityCtx.stroke();
+                
+                // Get theoretical features
+                const features = calculateDiffractionFeatures();
+                
+                // Draw background band indicators
+                for (const max of features.maxima) {
+                    if (Math.abs(max) <= maxOffset) {
+                        const x = 30 + (max + maxOffset) / (2 * maxOffset) * chartWidth;
+                        const width = max === 0 ? 50 : 30; // Central band is wider
+                        
+                        // Draw background band
+                        intensityCtx.fillStyle = max === 0 ? 'rgba(46, 204, 113, 0.1)' : 'rgba(46, 204, 113, 0.05)';
+                        intensityCtx.fillRect(x - width/2, 20, width, chartHeight);
+                    }
+                }
+                
+                // Draw theoretical diffraction curve
+                intensityCtx.strokeStyle = 'rgba(52, 152, 219, 0.8)';
+                intensityCtx.lineWidth = 1.5;
+                intensityCtx.beginPath();
+                
+                for (let offset = -maxOffset; offset <= maxOffset; offset += 2) {
+                    const x = 30 + (offset + maxOffset) / (2 * maxOffset) * chartWidth;
+                    const theoreticalIntensity = calculateDiffractionIntensity(offset);
+                    const y = 20 + chartHeight - (theoreticalIntensity * chartHeight);
+                    
+                    if (offset === -maxOffset) {
+                        intensityCtx.moveTo(x, y);
+                    } else {
+                        intensityCtx.lineTo(x, y);
+                    }
+                }
+                
+                intensityCtx.stroke();
+                
+                // Draw actual intensity data points
+                let positions = Object.keys(positionIntensityData).sort((a, b) => parseInt(a) - parseInt(b));
+                
+                positions.forEach((pos, i) => {
+                    const value = positionIntensityData[pos] || 0;
+                    
+                    const x = 30 + (parseInt(pos) + maxOffset) / (2 * maxOffset) * chartWidth;
+                    const y = 20 + chartHeight - (value * chartHeight);
+                    
+                    // Add dots at data points colored by intensity
+                    intensityCtx.fillStyle = getIntensityColor(value);
+                    intensityCtx.beginPath();
+                    intensityCtx.arc(x, y, 3, 0, Math.PI * 2);
+                    intensityCtx.fill();
+                });
+                
+                // Connect the data points with a line if there are enough points
+                if (positions.length > 5) {
+                    intensityCtx.strokeStyle = 'rgba(231, 76, 60, 0.5)';
+                    intensityCtx.lineWidth = 1;
+                    intensityCtx.beginPath();
+                    
+                    let firstPoint = true;
+                    positions.forEach((pos, i) => {
+                        const value = positionIntensityData[pos] || 0;
+                        const x = 30 + (parseInt(pos) + maxOffset) / (2 * maxOffset) * chartWidth;
+                        const y = 20 + chartHeight - (value * chartHeight);
+                        
+                        if (firstPoint) {
+                            intensityCtx.moveTo(x, y);
+                            firstPoint = false;
+                        } else {
+                            intensityCtx.lineTo(x, y);
+                        }
+                    });
+                    
+                    intensityCtx.stroke();
+                }
+                
+                // Highlight current position
+                const currentPos = Math.round(observerOffset).toString();
+                if (positionIntensityData[currentPos]) {
+                    const x = 30 + (parseInt(currentPos) + maxOffset) / (2 * maxOffset) * chartWidth;
+                    const value = positionIntensityData[currentPos];
+                    const y = 20 + chartHeight - (value * chartHeight);
+                    
+                    intensityCtx.fillStyle = '#f39c12';
+                    intensityCtx.beginPath();
+                    intensityCtx.arc(x, y, 5, 0, Math.PI * 2);
+                    intensityCtx.fill();
+                } else {
+                    // Just show current position with a vertical line
+                    const x = 30 + (parseInt(currentPos) + maxOffset) / (2 * maxOffset) * chartWidth;
+                    intensityCtx.strokeStyle = '#f39c12';
+                    intensityCtx.lineWidth = 1;
+                    intensityCtx.setLineDash([5, 3]);
+                    intensityCtx.beginPath();
+                    intensityCtx.moveTo(x, 20);
+                    intensityCtx.lineTo(x, 20 + chartHeight);
+                    intensityCtx.stroke();
+                    intensityCtx.setLineDash([]);
+                }
+                
+                // Draw axis labels
+                intensityCtx.fillStyle = '#555';
+                intensityCtx.font = '10px Arial';
+                intensityCtx.fillText('-' + maxOffset, 20, chartHeight + 25);
+                intensityCtx.fillText('0', chartWidth/2 + 30, chartHeight + 25);
+                intensityCtx.fillText('+' + maxOffset, chartWidth + 20, chartHeight + 25);
+                intensityCtx.fillText('Observer Position', chartWidth/2, chartHeight + 45);
+                
+                // Draw y axis label
+                intensityCtx.save();
+                intensityCtx.translate(15, chartHeight/2 + 20);
+                intensityCtx.rotate(-Math.PI/2);
+                intensityCtx.fillText('Intensity', 0, 0);
+                intensityCtx.restore();
+                
+                // Draw legend
+                intensityCtx.fillStyle = '#333';
+                intensityCtx.font = '10px Arial';
+                intensityCtx.fillText(`Positions Measured: ${positions.length}`, intensityCanvas.width - 150, 15);
+            }
+            
+            function update() {
+                currentTime = Date.now();
+                
+                updateWaves();
+                
+                // Add new observer processing horizons periodically
+                if (isRunning && !readyToMove && !isPaused && pulsesReleased < NUM_WAVES) {
+                    const lastObserverWave = waves.filter(w => w.type === 'observer').pop();
+                    
+                    if (!lastObserverWave || lastObserverWave.radius > WAVE_SPACING) {
+                        // Get current quantum state of light
+                        const currentQuantumState = getLightQuantumState();
+                        
+                        // Increment pulse counter
+                        pulsesReleased++;
+                        
+                        // Release a new pulse with the current quantum state
+                        waves.push({
+                            type: 'observer',
+                            radius: 0,
+                            opacity: 1,
+                            observerOffset: observerOffset,
+                            quantumState: currentQuantumState,
+                            pulseNumber: pulsesReleased
+                        });
+                        
+                        // If we've released all pulses for this position, prepare to move
+                        if (pulsesReleased >= NUM_WAVES) {
+                            readyToMove = true;
+                        }
+                    }
+                }
+            }
+            
+            function animate() {
+                drawBackground();
+                update();
+                drawWaves();
+                
+                if (isRunning) {
+                    animationId = requestAnimationFrame(animate);
+                }
+            }
+            
+            function startAnimation() {
+                if (!isRunning) {
+                    isRunning = true;
+                    startBtn.textContent = 'Pause Animation';
+                    animationId = requestAnimationFrame(animate);
+                } else {
+                    isRunning = false;
+                    startBtn.textContent = 'Start Animation';
+                    cancelAnimationFrame(animationId);
+                }
+            }
+            
+            function resetAnimation() {
+                isRunning = false;
+                startBtn.textContent = 'Start Animation';
+                cancelAnimationFrame(animationId);
+                waves = [];
+                observerOffset = 0;
+                pulsesReleased = 0;
+                readyToMove = false;
+                isPaused = false;
+                positionWaveData = {};
+                positionIntensityData = {};
+                currentWaveData = [];
+                currentIntensity = 0;
+                detectionTimes = {};
+                detectionIntensities = {};
+                detectionsForCurrentPosition = 0;
+                totalDetections = 0;
+                updateSlitWidth();
+                updateWavelength();
+                
+                // Reset speed to normal
+                speedMultiplier = 1;
+                WAVE_SPEED = 0.5;
+                OSCILLATION_PERIOD = BASE_OSCILLATION_PERIOD;
+                speedBtn.textContent = "10x Speed";
+                
+                if (moveTimer) {
+                    clearTimeout(moveTimer);
+                    moveTimer = null;
+                }
+                
+                if (pauseTimer) {
+                    clearTimeout(pauseTimer);
+                    pauseTimer = null;
+                }
+                
+                drawBackground();
+                updateWaveChart();
+                updateIntensityChart();
+                calculateDiffractionFeatures();
+                
+                // Update UI
+                positionValue.textContent = "0";
+                positionInput.value = "0";
+                coherenceFill.style.width = "0%";
+                coherenceValue.textContent = "0";
+                detectionInfo.innerHTML = "";
+            }
+            
+            function updateSlitWidth() {
+                SLIT_WIDTH = parseInt(slitWidthSlider.value);
+                slitWidthValue.textContent = SLIT_WIDTH;
+                slit.width = SLIT_WIDTH;
+                calculateDiffractionFeatures();
+            }
+            
+            function updateWavelength() {
+                WAVELENGTH = parseInt(wavelengthSlider.value);
+                wavelengthValue.textContent = WAVELENGTH;
+                calculateDiffractionFeatures();
+            }
+            
+            function toggleSpeed() {
+                if (speedMultiplier === 1) {
+                    speedMultiplier = 10;
+                    WAVE_SPEED = 0.5 * 10;
+                    OSCILLATION_PERIOD = BASE_OSCILLATION_PERIOD / 10;
+                    speedBtn.textContent = "Normal Speed";
+                } else {
+                    speedMultiplier = 1;
+                    WAVE_SPEED = 0.5;
+                    OSCILLATION_PERIOD = BASE_OSCILLATION_PERIOD;
+                    speedBtn.textContent = "10x Speed";
+                }
+            }
+            
+            function decreasePosition() {
+                const newPosition = Math.max(-maxOffset, Math.round(observerOffset) - 10);
+                updatePosition(newPosition);
+            }
+            
+            function increasePosition() {
+                const newPosition = Math.min(maxOffset, Math.round(observerOffset) + 10);
+                updatePosition(newPosition);
+            }
+            
+            function goToPosition() {
+                const newPosition = Math.max(-maxOffset, Math.min(maxOffset, parseInt(positionInput.value) || 0));
+                updatePosition(newPosition);
+            }
+            
+            function updatePosition(newPosition) {
+                if (!isPaused && isRunning) {
+                    observerOffset = newPosition;
+                    positionValue.textContent = Math.round(observerOffset);
+                    positionInput.value = Math.round(observerOffset);
+                    
+                    // Reset for next pulse sequence
+                    pulsesReleased = 0;
+                    readyToMove = false;
+                    detectionsForCurrentPosition = 0;
+                    currentWaveData = [];
+                    
+                    // Update intensity meter if we have data for this position
+                    const posKey = Math.round(observerOffset).toString();
+                    if (positionIntensityData[posKey]) {
+                        currentIntensity = positionIntensityData[posKey];
+                        coherenceFill.style.width = `${currentIntensity * 100}%`;
+                        coherenceValue.textContent = (currentIntensity * 100).toFixed(0);
+                    } else {
+                        currentIntensity = 0;
+                        coherenceFill.style.width = "0%";
+                        coherenceValue.textContent = "0";
+                    }
+                    
+                    // Update wave chart
+                    updateWaveChart();
+                }
+            }
+            
+            // Jump to minima and maxima positions
+            function jumpToFeature(type, index) {
+                const features = calculateDiffractionFeatures();
+                let position = 0;
+                
+                if (type === 'min' && features.minima.length > 0) {
+                    position = features.minima[Math.min(index, features.minima.length - 1)];
+                } else if (type === 'max' && features.maxima.length > 0) {
+                    position = features.maxima[Math.min(index, features.maxima.length - 1)];
+                }
+                
+                // Round to nearest 10
+                position = Math.round(position / 10) * 10;
+                updatePosition(position);
+            }
+            
+            // Preset configurations
+            function setPreset(type) {
+                switch (type) {
+                    case 'wide-slit':
+                        slitWidthSlider.value = 100;
+                        updateSlitWidth();
+                        break;
+                    case 'narrow-slit':
+                        slitWidthSlider.value = 20;
+                        updateSlitWidth();
+                        break;
+                    case 'long-lambda':
+                        wavelengthSlider.value = 40;
+                        updateWavelength();
+                        break;
+                    case 'short-lambda':
+                        wavelengthSlider.value = 10;
+                        updateWavelength();
+                        break;
+                }
+            }
+            
+            // Event listeners
+            startBtn.addEventListener('click', startAnimation);
+            resetBtn.addEventListener('click', resetAnimation);
+            speedBtn.addEventListener('click', toggleSpeed);
+            decreaseBtn.addEventListener('click', decreasePosition);
+            increaseBtn.addEventListener('click', increasePosition);
+            goToBtn.addEventListener('click', goToPosition);
+            
+            slitWidthSlider.addEventListener('input', function() {
+                slitWidthValue.textContent = this.value;
+                SLIT_WIDTH = parseInt(this.value);
+                slit.width = SLIT_WIDTH;
+                calculateDiffractionFeatures();
+            });
+            
+            wavelengthSlider.addEventListener('input', function() {
+                wavelengthValue.textContent = this.value;
+                WAVELENGTH = parseInt(this.value);
+                calculateDiffractionFeatures();
+            });
+            
+            positionInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    goToPosition();
+                }
+            });
+            
+            // Preset buttons
+            presetWidth1.addEventListener('click', () => setPreset('wide-slit'));
+            presetWidth2.addEventListener('click', () => setPreset('narrow-slit'));
+            presetLambda1.addEventListener('click', () => setPreset('long-lambda'));
+            presetLambda2.addEventListener('click', () => setPreset('short-lambda'));
+            
+            // Initialize
+            calculateDiffractionFeatures();
+            resetAnimation();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeless Photon Field Theory - Sine Wave Sampling Visualization</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .canvas-container {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+        canvas {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+            align-items: center;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .info-box {
+            background-color: #e8f4fc;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+        input[type="range"] {
+            margin: 5px 0;
+        }
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+        .explanation {
+            line-height: 1.6;
+        }
+        .sample-info {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Timeless Photon Field Theory</h1>
+    <h2>The Sine Wave Analogy - Interactive Visualization</h2>
+
+    <div class="info-box">
+        <p>This visualization demonstrates how individual samplings (photon detections) build up to reveal the complete wave pattern that exists in the timeless field.</p>
+        <p>According to the Timeless Photon Field Theory, what we call "photons" are actually sampling effects - points of interaction between a time-bound observer and the underlying timeless field.</p>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="waveCanvas" width="1100" height="400"></canvas>
+    </div>
+
+    <div class="controls">
+        <div class="slider-container">
+            <label for="samplingRate">Sampling Rate:</label>
+            <input type="range" id="samplingRate" min="1" max="100" value="5">
+            <span id="samplingRateValue">5 samples</span>
+        </div>
+
+        <button id="resetBtn">Reset</button>
+        <button id="toggleAnimationBtn">Pause</button>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: rgba(0, 0, 255, 0.3);"></div>
+            <span>Complete Timeless Wave (Field)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: red;"></div>
+            <span>Individual Samplings (Photon Detections)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: green;"></div>
+            <span>Accumulated Samplings</span>
+        </div>
+    </div>
+
+    <div class="sample-info">
+        <span id="sampleCount">Samples taken: 0</span>
+    </div>
+</div>
+
+<div class="container">
+    <h2>Explanation</h2>
+    <div class="explanation">
+        <p><strong>The Timeless Field vs. Sequential Sampling:</strong> The complete sine wave (shown in blue) represents the entire photon field that exists timelessly. In the theory's framework, this pattern is instantaneously imprinted onto the timeless field when a light source is activated.</p>
+
+        <p><strong>Photons as Sampling Points:</strong> The red dots represent individual "photon detections" - these are not particles traveling through space but rather moments when a time-bound observer samples the timeless field at specific points.</p>
+
+        <p><strong>Emergent Wave Pattern:</strong> As more samples accumulate (green dots), the underlying wave pattern becomes apparent. This illustrates how wave-like properties emerge naturally from accumulated sampling points, without requiring photons to "travel" as waves.</p>
+
+        <p><strong>Quantum Implications:</strong> This visualization helps explain quantum phenomena like the double-slit experiment. The interference pattern isn't created by photons interfering with themselves, but represents the time-bound sampling of a complete interference pattern that exists timelessly in the field.</p>
+    </div>
+</div>
+
+<script>
+    // Canvas setup
+    const canvas = document.getElementById('waveCanvas');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // UI elements
+    const samplingRateSlider = document.getElementById('samplingRate');
+    const samplingRateValue = document.getElementById('samplingRateValue');
+    const resetBtn = document.getElementById('resetBtn');
+    const toggleAnimationBtn = document.getElementById('toggleAnimationBtn');
+    const sampleCountElement = document.getElementById('sampleCount');
+
+    // Visualization parameters
+    let samples = [];
+    let animationId = null;
+    let isAnimating = true;
+    let time = 0;
+    let sampleCount = 0;
+    let lastSampleTime = 0;
+    const frequency = 2; // Fixed frequency (previously controlled by slider)
+
+    // Initialize the visualization
+    function init() {
+        samples = [];
+        sampleCount = 0;
+        time = 0;
+        lastSampleTime = 0;
+        updateSampleCount();
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+        }
+        if (isAnimating) {
+            animate();
+        } else {
+            draw();
+        }
+    }
+
+    // Draw function to render the visualization
+    function draw() {
+        ctx.clearRect(0, 0, width, height);
+
+        const amplitude = height / 4;
+        const yCenter = height / 2;
+
+        // Draw grid
+        drawGrid();
+
+        // Draw the complete sine wave (timeless field)
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(0, 0, 255, 0.3)';
+        ctx.lineWidth = 2;
+
+        for (let x = 0; x < width; x++) {
+            const t = (x / width) * Math.PI * 10;
+            const y = yCenter - amplitude * Math.sin(t * frequency);
+
+            if (x === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+
+        ctx.stroke();
+
+        // Draw accumulated samples (green dots)
+        ctx.fillStyle = 'green';
+        for (const sample of samples) {
+            ctx.beginPath();
+            ctx.arc(sample.x, sample.y, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Draw the most recent sample (red dot)
+        if (samples.length > 0) {
+            const latestSample = samples[samples.length - 1];
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            ctx.arc(latestSample.x, latestSample.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // Draw the background grid
+    function drawGrid() {
+        ctx.strokeStyle = 'rgba(200, 200, 200, 0.3)';
+        ctx.lineWidth = 1;
+
+        // Vertical grid lines
+        for (let x = 0; x <= width; x += width / 20) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
+        }
+
+        // Horizontal grid lines
+        for (let y = 0; y <= height; y += height / 10) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+
+        // Draw x-axis
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.beginPath();
+        ctx.moveTo(0, height / 2);
+        ctx.lineTo(width, height / 2);
+        ctx.stroke();
+
+        // Label the x-axis
+        ctx.fillStyle = 'black';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Time / Position', width / 2, height - 10);
+
+        // Label the y-axis
+        ctx.save();
+        ctx.translate(10, height / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.textAlign = 'center';
+        ctx.fillText('Amplitude', 0, 0);
+        ctx.restore();
+    }
+
+    // Animation loop
+    function animate() {
+        time += 0.01;
+
+        // Take samples based on the sampling rate
+        const samplingRate = parseInt(samplingRateSlider.value);
+        const samplingInterval = 100 / samplingRate;
+
+        if (time - lastSampleTime >= samplingInterval * 0.01) {
+            takeSample();
+            lastSampleTime = time;
+        }
+
+        draw();
+
+        // Continue animation
+        animationId = requestAnimationFrame(animate);
+    }
+
+    // Take a sample from the wave
+    function takeSample() {
+        const amplitude = height / 4;
+        const yCenter = height / 2;
+
+        // Regular sampling (evenly spaced)
+        const x = (sampleCount * width / 100) % width;
+
+        const t = (x / width) * Math.PI * 10;
+        const y = yCenter - amplitude * Math.sin(t * frequency);
+
+        samples.push({ x, y });
+        sampleCount++;
+
+        // Limit the number of displayed samples for performance
+        if (samples.length > 1000) {
+            samples.shift();
+        }
+
+        updateSampleCount();
+    }
+
+    // Update the sample count display
+    function updateSampleCount() {
+        sampleCountElement.textContent = `Samples taken: ${sampleCount}`;
+    }
+
+    // Event listeners
+    samplingRateSlider.addEventListener('input', function() {
+        samplingRateValue.textContent = `${this.value} samples`;
+    });
+
+    resetBtn.addEventListener('click', function() {
+        init();
+    });
+
+    toggleAnimationBtn.addEventListener('click', function() {
+        isAnimating = !isAnimating;
+        this.textContent = isAnimating ? 'Pause' : 'Resume';
+
+        if (isAnimating) {
+            animate();
+        } else if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
+    });
+
+    // Initialize the visualization when the page loads
+    window.addEventListener('load', init);
+</script>
+</body>
+</html>

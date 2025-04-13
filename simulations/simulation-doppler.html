@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeless Photon Field Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        
+        .description {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: auto;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .simulation-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .canvas-container {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 10px;
+        }
+        
+        canvas {
+            display: block;
+            background-color: #fff;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Timeless Photon Field Simulation</h1>
+        
+        <div class="description">
+            <h2>Understanding the Processing Horizon Theory & Time/Motion Budget Principle</h2>
+            <p>This simulation demonstrates how a time-bound observer perceives the timeless photon field. The observer starts near a light source and moves away at a controllable velocity. As the observer moves, they create processing horizons (expanding circles) that sample the timeless field when they intersect with the light source.</p>
+            <p>According to the Time/Motion Budget Principle, as velocity increases, less budget is available for time processing, resulting in slower sampling rates and time dilation effects.</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="velocity">Observer Velocity (% of c):</label>
+                <input type="range" id="velocity" min="0" max="99" value="30" step="1">
+                <span id="velocity-value">30%</span>
+            </div>
+            
+            <div class="control-group">
+                <label for="wave-frequency">Light Wave Frequency:</label>
+                <input type="range" id="wave-frequency" min="0.5" max="5" value="1" step="0.1">
+                <span id="frequency-value">1 Hz</span>
+            </div>
+            
+            <div class="control-group">
+                <label for="time-scale">Simulation Speed:</label>
+                <input type="range" id="time-scale" min="0.1" max="2" value="1" step="0.1">
+                <span id="time-scale-value">1x</span>
+            </div>
+            
+            <div class="control-group">
+                <button id="pause-btn">Pause Simulation</button>
+            </div>
+            
+            <div class="control-group">
+                <button id="reset-btn">Reset Simulation</button>
+            </div>
+        </div>
+        
+        <div class="simulation-container">
+            <div class="canvas-container">
+                <h3>Simulation View</h3>
+                <canvas id="simulation-canvas" width="1160" height="400"></canvas>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: yellow;"></div>
+                        <span>Light Source</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: blue;"></div>
+                        <span>Observer</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="border: 2px solid rgba(0, 128, 255, 0.8); background-color: transparent;"></div>
+                        <span>Processing Horizons</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: red;"></div>
+                        <span>Timeless Photon Field</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="canvas-container">
+                <h3>Observer's Perception (Sampled Wave)</h3>
+                <canvas id="wave-canvas" width="1160" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Constants
+        const SPEED_OF_LIGHT = 100; // Simulation units per second
+        const LIGHT_SOURCE_X = 80;
+        const INITIAL_OBSERVER_X = 120;
+        const OBSERVER_Y = 200;
+        const FIELD_LINE_Y = 200;
+        const FIELD_AMPLITUDE = 60;
+        const HORIZON_INTERVAL = 0.2; // Fixed time interval in seconds
+        const PERCEPTION_UNIT = 20; // Pixels per perception unit
+        
+        // Simulation state
+        let observer = {
+            x: INITIAL_OBSERVER_X,
+            y: OBSERVER_Y,
+            velocity: 0.3 * SPEED_OF_LIGHT, // 30% of c
+            processingRate: 0.7 * SPEED_OF_LIGHT // (c - v)
+        };
+        
+        let time = 0;
+        let lastHorizonTime = 0;
+        let horizons = [];
+        let sampledPoints = [];
+        let perceptionPosition = 0; // Current position of the perception line
+        let waveFrequency = 1; // Hz
+        let timeScale = 1;
+        let running = true;
+        
+        // Get canvas contexts
+        const simCanvas = document.getElementById('simulation-canvas');
+        const simCtx = simCanvas.getContext('2d');
+        const waveCanvas = document.getElementById('wave-canvas');
+        const waveCtx = waveCanvas.getContext('2d');
+        
+        // UI elements
+        const velocitySlider = document.getElementById('velocity');
+        const velocityValue = document.getElementById('velocity-value');
+        const frequencySlider = document.getElementById('wave-frequency');
+        const frequencyValue = document.getElementById('frequency-value');
+        const timeScaleSlider = document.getElementById('time-scale');
+        const timeScaleValue = document.getElementById('time-scale-value');
+        const resetBtn = document.getElementById('reset-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        
+        // Event listeners
+        velocitySlider.addEventListener('input', function() {
+            const velocityPercent = parseInt(this.value);
+            velocityValue.textContent = velocityPercent + '%';
+            observer.velocity = (velocityPercent / 100) * SPEED_OF_LIGHT;
+            observer.processingRate = SPEED_OF_LIGHT - observer.velocity;
+        });
+        
+        frequencySlider.addEventListener('input', function() {
+            waveFrequency = parseFloat(this.value);
+            frequencyValue.textContent = waveFrequency.toFixed(1) + ' Hz';
+        });
+        
+        timeScaleSlider.addEventListener('input', function() {
+            timeScale = parseFloat(this.value);
+            timeScaleValue.textContent = timeScale.toFixed(1) + 'x';
+        });
+        
+        resetBtn.addEventListener('click', resetSimulation);
+        
+        pauseBtn.addEventListener('click', function() {
+            running = !running;
+            this.textContent = running ? 'Pause Simulation' : 'Resume Simulation';
+        });
+        
+        function resetSimulation() {
+            observer.x = INITIAL_OBSERVER_X;
+            observer.y = OBSERVER_Y;
+            time = 0;
+            lastHorizonTime = 0;
+            perceptionPosition = 0;
+            horizons = [];
+            sampledPoints = [];
+        }
+        
+        // Calculate field height at a given time
+        function getFieldHeight(t) {
+            return FIELD_LINE_Y - FIELD_AMPLITUDE * Math.sin(2 * Math.PI * waveFrequency * t);
+        }
+        
+        // Create a new processing horizon
+        function createHorizon() {
+            // Calculate the Lorentz factor (gamma)
+            const gamma = 1 / Math.sqrt(1 - Math.pow(observer.velocity / SPEED_OF_LIGHT, 2));
+            
+            horizons.push({
+                x: observer.x,
+                y: observer.y,
+                creationTime: time,
+                radius: 0,
+                fieldHeight: getFieldHeight(time),
+                sampled: false,
+                // Store observer's proper time (dilated)
+                properTime: time / gamma
+            });
+            lastHorizonTime = time;
+        }
+        
+        // Draw the simulation
+        function drawSimulation() {
+            simCtx.clearRect(0, 0, simCanvas.width, simCanvas.height);
+            
+            // Draw timeless photon field (horizontal line that oscillates)
+            simCtx.beginPath();
+            simCtx.strokeStyle = 'red';
+            simCtx.lineWidth = 2;
+            simCtx.moveTo(0, getFieldHeight(time));
+            simCtx.lineTo(simCanvas.width, getFieldHeight(time));
+            simCtx.stroke();
+            
+            // Draw light source
+            simCtx.beginPath();
+            simCtx.fillStyle = 'yellow';
+            simCtx.arc(LIGHT_SOURCE_X, FIELD_LINE_Y, 10, 0, 2 * Math.PI);
+            simCtx.fill();
+            simCtx.strokeStyle = 'black';
+            simCtx.lineWidth = 1;
+            simCtx.stroke();
+            
+            // Draw processing horizons
+            for (const horizon of horizons) {
+                simCtx.beginPath();
+                simCtx.strokeStyle = 'rgba(0, 128, 255, 0.8)';
+                simCtx.lineWidth = 1;
+                simCtx.arc(horizon.x, horizon.y, horizon.radius, 0, 2 * Math.PI);
+                simCtx.stroke();
+            }
+            
+            // Draw observer
+            simCtx.beginPath();
+            simCtx.fillStyle = 'blue';
+            simCtx.arc(observer.x, observer.y, 8, 0, 2 * Math.PI);
+            simCtx.fill();
+            
+            // Draw info text
+            simCtx.fillStyle = 'black';
+            simCtx.font = '14px Arial';
+            simCtx.fillText(`Observer velocity: ${(observer.velocity / SPEED_OF_LIGHT * 100).toFixed(0)}% of c`, 10, 20);
+            simCtx.fillText(`Processing rate: ${(observer.processingRate / SPEED_OF_LIGHT * 100).toFixed(0)}% of c`, 10, 40);
+            simCtx.fillText(`Simulation time: ${time.toFixed(2)}s`, 10, 60);
+        }
+        
+        // Draw the wave graph
+        function drawWaveGraph() {
+            waveCtx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+            
+            // Draw axes
+            waveCtx.beginPath();
+            waveCtx.strokeStyle = '#ccc';
+            waveCtx.moveTo(0, waveCanvas.height / 2);
+            waveCtx.lineTo(waveCanvas.width, waveCanvas.height / 2);
+            waveCtx.stroke();
+            
+            // Add vertical grid lines (wavelength markers)
+            const gridSpacing = 100; // pixels
+            waveCtx.strokeStyle = '#eee';
+            for (let x = gridSpacing; x < waveCanvas.width; x += gridSpacing) {
+                waveCtx.beginPath();
+                waveCtx.moveTo(x, 0);
+                waveCtx.lineTo(x, waveCanvas.height);
+                waveCtx.stroke();
+            }
+            
+            // Draw sampled points and perception line
+            if (sampledPoints.length > 0) {
+                // Calculate scroll offset based on perception position
+                const visibleWidth = waveCanvas.width;
+                const scrollOffset = Math.max(0, perceptionPosition * PERCEPTION_UNIT - visibleWidth/2);
+                
+                // Draw perception line (green vertical line)
+                const perceptionX = perceptionPosition * PERCEPTION_UNIT - scrollOffset;
+                waveCtx.beginPath();
+                waveCtx.strokeStyle = 'green';
+                waveCtx.lineWidth = 2;
+                waveCtx.setLineDash([5, 3]);
+                waveCtx.moveTo(perceptionX, 0);
+                waveCtx.lineTo(perceptionX, waveCanvas.height);
+                waveCtx.stroke();
+                waveCtx.setLineDash([]);
+                
+                // First draw a line connecting all points
+                waveCtx.beginPath();
+                waveCtx.strokeStyle = 'blue';
+                waveCtx.lineWidth = 2;
+                
+                let firstVisiblePoint = true;
+                for (let i = 0; i < sampledPoints.length; i++) {
+                    const x = sampledPoints[i].perceptionPosition * PERCEPTION_UNIT - scrollOffset;
+                    
+                    // Skip points that are outside the visible area
+                    if (x < -10 || x > waveCanvas.width + 10) {
+                        continue;
+                    }
+                    
+                    const y = sampledPoints[i].fieldHeight - FIELD_LINE_Y + waveCanvas.height / 2;
+                    
+                    if (firstVisiblePoint) {
+                        waveCtx.moveTo(x, y);
+                        firstVisiblePoint = false;
+                    } else {
+                        waveCtx.lineTo(x, y);
+                    }
+                }
+                waveCtx.stroke();
+                
+                // Then draw the individual points
+                for (let i = 0; i < sampledPoints.length; i++) {
+                    const x = sampledPoints[i].perceptionPosition * PERCEPTION_UNIT - scrollOffset;
+                    
+                    // Skip points that are outside the visible area
+                    if (x < -10 || x > waveCanvas.width + 10) {
+                        continue;
+                    }
+                    
+                    const y = sampledPoints[i].fieldHeight - FIELD_LINE_Y + waveCanvas.height / 2;
+                    
+                    // Draw point
+                    waveCtx.fillStyle = 'blue';
+                    waveCtx.beginPath();
+                    waveCtx.arc(x, y, 4, 0, 2 * Math.PI);
+                    waveCtx.fill();
+                }
+                
+                // Calculate observed frequency based on the drawn wave pattern
+                if (sampledPoints.length > 10) {
+                    // Count zero crossings in the plotted wave
+                    let zeroCrossings = 0;
+                    for (let i = 1; i < sampledPoints.length; i++) {
+                        const prevY = sampledPoints[i-1].fieldHeight - FIELD_LINE_Y;
+                        const currY = sampledPoints[i].fieldHeight - FIELD_LINE_Y;
+                        if (prevY * currY <= 0 && (prevY !== 0 || currY !== 0)) {
+                            zeroCrossings++;
+                        }
+                    }
+                    
+                    // Calculate cycles (half the zero crossings)
+                    const cycles = zeroCrossings / 2;
+                    
+                    // Calculate the range of perception positions
+                    const firstPos = sampledPoints[0].perceptionPosition;
+                    const lastPos = sampledPoints[sampledPoints.length - 1].perceptionPosition;
+                    const perceptionUnits = lastPos - firstPos;
+                    
+                    if (perceptionUnits > 0) {
+                        // Calculate frequency (cycles per perception unit × units per second)
+                        const unitsPerSecond = 1 / HORIZON_INTERVAL; // Each unit created every HORIZON_INTERVAL seconds
+                        const observedFrequency = (cycles / perceptionUnits) * unitsPerSecond;
+                        
+                        waveCtx.fillText(`Drawn wave frequency: ${observedFrequency.toFixed(2)} Hz`, 10, 40);
+                        
+                        // Calculate expected relativistic Doppler shift
+                        // For moving away: f' = f * sqrt((1 - v/c)/(1 + v/c))
+                        const beta = observer.velocity / SPEED_OF_LIGHT;
+                        const expectedFrequency = waveFrequency * Math.sqrt((1 - beta) / (1 + beta));
+                        waveCtx.fillText(`Expected frequency (relativistic Doppler): ${expectedFrequency.toFixed(2)} Hz`, 10, 60);
+                    }
+                }
+                
+                waveCtx.fillStyle = 'black';
+                waveCtx.font = '14px Arial';
+                waveCtx.fillText(`Light source frequency: ${waveFrequency.toFixed(2)} Hz`, 10, 20);
+            }
+        }
+        
+        // Main animation loop
+        let lastTime = 0;
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTimeMS = timestamp - lastTime;
+            lastTime = timestamp;
+            
+            if (running) {
+                // Calculate simulation time step
+                const deltaTime = (deltaTimeMS / 1000) * timeScale;
+                time += deltaTime;
+                
+                // Move observer
+                observer.x += observer.velocity * deltaTime;
+                
+                // Create horizons at a fixed time interval
+                if (time - lastHorizonTime >= HORIZON_INTERVAL) {
+                    createHorizon();
+                    lastHorizonTime = time;
+                    
+                    // Advance perception position when a new horizon is created
+                    // This represents the observer's perception moving forward at a constant rate
+                    perceptionPosition += 1;
+                }
+                
+                // Expand all horizons
+                for (const horizon of horizons) {
+                    // Expand at the processing rate (c - v)
+                    horizon.radius += observer.processingRate * deltaTime;
+                    
+                    // Check if horizon intersects with light source and hasn't been sampled yet
+                    const distToLightSource = Math.sqrt(
+                        Math.pow(horizon.x - LIGHT_SOURCE_X, 2) + 
+                        Math.pow(horizon.y - FIELD_LINE_Y, 2)
+                    );
+                    
+                    if (!horizon.sampled && distToLightSource <= horizon.radius) {
+                        // Sample the field at this intersection
+                        sampledPoints.push({
+                            horizonCreationTime: horizon.creationTime,
+                            intersectionTime: time,
+                            fieldHeight: horizon.fieldHeight,
+                            observerTime: time - (distToLightSource / observer.processingRate),
+                            perceptionPosition: perceptionPosition, // Store the current perception position
+                            // Store proper time for time dilation visualization
+                            properTime: horizon.properTime !== undefined ? horizon.properTime : time
+                        });
+                        horizon.sampled = true;
+                    }
+                }
+                
+                // Remove horizons that have been sampled or expanded beyond the canvas
+                horizons = horizons.filter(h => !h.sampled && h.radius < simCanvas.width * 2);
+            }
+            
+            // Draw everything
+            drawSimulation();
+            drawWaveGraph();
+            
+            // Continue animation
+            requestAnimationFrame(animate);
+        }
+        
+        // Start the simulation
+        resetSimulation();
+        createHorizon(); // Create initial horizon
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>

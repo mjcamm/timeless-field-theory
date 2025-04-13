@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time/Motion Budget Principle Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+        }
+        .description {
+            margin-bottom: 20px;
+            color: #555;
+        }
+        .canvas-container {
+            width: 100%;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #d0d0d0;
+        }
+        button.active {
+            background-color: #3366cc;
+            color: white;
+        }
+        .info-box {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        ul {
+            margin-top: 0;
+            padding-left: 25px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        .allocation-display {
+            text-align: right;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        @media (max-width: 600px) {
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>The Time/Motion Budget Principle</h1>
+        
+        <div class="description">
+            <p>This diagram illustrates how entities allocate their fixed "time/motion budget" (equal to c) 
+            between movement through space and sampling through time.</p>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="budgetCanvas"></canvas>
+        </div>
+        
+        <div class="controls">
+            <div class="allocation-display" id="allocationDisplay">
+                Space: 50% | Time: 50%
+            </div>
+            
+            <label for="spaceAllocation">Space/Time Allocation:</label>
+            <input 
+                type="range" 
+                id="spaceAllocation" 
+                min="0" 
+                max="1" 
+                step="0.01" 
+                value="0.5"
+            >
+            <div class="slider-labels">
+                <span>0% Space (100% Time)</span>
+                <span>100% Space (0% Time)</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <label>Presets:</label>
+            <div class="button-group">
+                <button id="stationaryBtn" class="preset-btn">Stationary Observer</button>
+                <button id="movingBtn" class="preset-btn active">Moving Observer</button>
+                <button id="photonBtn" class="preset-btn">Photon</button>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3>Key Concepts:</h3>
+            <ul>
+                <li><strong>Constant Budget:</strong> The total budget (c) is represented by the red hypotenuse.</li>
+                <li><strong>Space Component:</strong> The blue horizontal line shows allocation to spatial movement.</li>
+                <li><strong>Time Component:</strong> The green vertical line shows allocation to time sampling.</li>
+                <li><strong>Pythagorean Relationship:</strong> Space² + Time² = c² (constant)</li>
+            </ul>
+            <p>The pink dashed line shows the trajectory through spacetime for a given allocation.</p>
+        </div>
+    </div>
+
+    <script>
+        // Main variables
+        let spaceAllocation = 0.5;
+        let canvas, ctx, width, height;
+        
+        // Initialize the canvas
+        function initCanvas() {
+            canvas = document.getElementById('budgetCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Set canvas size to match container
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = Math.min(container.clientWidth * 0.75, 600); // 4:3 aspect ratio with max height
+            
+            width = canvas.width;
+            height = canvas.height;
+            
+            // Draw initial state
+            drawVisualization();
+        }
+        
+        // Draw the complete visualization
+        function drawVisualization() {
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Set up coordinate system
+            const originX = width * 0.15;
+            const originY = height * 0.85;
+            const axisLength = Math.min(width, height) * 0.7;
+            const budgetRadius = axisLength * 0.8;
+            
+            // Draw background
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Draw axes
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#000';
+            
+            // X-axis (Space)
+            ctx.beginPath();
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(originX + axisLength, originY);
+            ctx.stroke();
+            
+            // Y-axis (Time)
+            ctx.beginPath();
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(originX, originY - axisLength);
+            ctx.stroke();
+            
+            // Axis labels
+            ctx.font = 'bold 16px Arial';
+            ctx.fillStyle = '#000';
+            ctx.textAlign = 'center';
+            
+            // X-axis label
+            ctx.fillText('Space Movement', originX + axisLength / 2, originY + 30);
+            
+            // Y-axis label
+            ctx.save();
+            ctx.translate(originX - 30, originY - axisLength / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Time Sampling', 0, 0);
+            ctx.restore();
+            
+            // Draw budget circle (quarter circle)
+            ctx.beginPath();
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 3]);
+            ctx.arc(originX, originY, budgetRadius, 0, Math.PI / 2, true);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Label for budget limit (c)
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#666';
+            ctx.fillText('c (Total Budget)', originX + budgetRadius * 0.7, originY - budgetRadius * 0.7);
+            
+            // Draw current allocation
+            const timeAllocation = Math.sqrt(1 - spaceAllocation * spaceAllocation);
+            const spaceComponent = budgetRadius * spaceAllocation;
+            const timeComponent = budgetRadius * timeAllocation;
+            
+            // Space allocation line
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#0066cc';
+            ctx.beginPath();
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(originX + spaceComponent, originY);
+            ctx.stroke();
+            
+            // Time allocation line
+            ctx.strokeStyle = '#00cc66';
+            ctx.beginPath();
+            ctx.moveTo(originX + spaceComponent, originY);
+            ctx.lineTo(originX + spaceComponent, originY - timeComponent);
+            ctx.stroke();
+            
+            // Hypotenuse (total budget)
+            ctx.strokeStyle = '#cc0000';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(originX + spaceComponent, originY - timeComponent);
+            ctx.stroke();
+            
+            // Draw key state dots
+            const drawDot = (allocX, label, color) => {
+                const allocY = Math.sqrt(1 - allocX * allocX);
+                const x = originX + budgetRadius * allocX;
+                const y = originY - budgetRadius * allocY;
+                
+                // Highlight current selection with larger radius
+                const isSelected = Math.abs(allocX - spaceAllocation) < 0.05;
+                const radius = isSelected ? 8 : 6;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                
+                // Label
+                ctx.font = isSelected ? 'bold 14px Arial' : '12px Arial';
+                ctx.fillStyle = '#000';
+                ctx.textAlign = 'center';
+                
+                // Position label based on allocation
+                if (allocX < 0.3) {
+                    ctx.fillText(label, x, y - 15);
+                } else if (allocX > 0.7) {
+                    ctx.fillText(label, x - 15, y - 15);
+                } else {
+                    ctx.fillText(label, x + 20, y - 10);
+                }
+            };
+            
+            // Draw key states
+            drawDot(0, 'Stationary Observer', '#3366ff');
+            drawDot(0.5, 'Moving Observer', '#ff6633');
+            drawDot(1, 'Photon', '#ffcc00');
+            
+            // Current allocation dot
+            ctx.beginPath();
+            ctx.arc(originX + spaceComponent, originY - timeComponent, 8, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff0066';
+            ctx.fill();
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            
+            // Current allocation values
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#000';
+            ctx.textAlign = 'left';
+            ctx.fillText(`Space: ${(spaceAllocation * 100).toFixed(0)}%`, width * 0.7, height * 0.2);
+            ctx.fillText(`Time: ${(timeAllocation * 100).toFixed(0)}%`, width * 0.7, height * 0.2 + 25);
+            
+            // Pythagoras triangle fill
+            ctx.fillStyle = 'rgba(200, 200, 200, 0.2)';
+            ctx.beginPath();
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(originX + spaceComponent, originY);
+            ctx.lineTo(originX + spaceComponent, originY - timeComponent);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Add trajectory line
+            ctx.strokeStyle = '#ff00ff';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([2, 2]);
+            ctx.beginPath();
+            
+            // Draw trajectory for current allocation
+            const steps = 20;
+            for (let i = 0; i <= steps; i++) {
+                const t = (i / steps) * axisLength;
+                const x = originX + t * spaceAllocation;
+                const y = originY - t * timeAllocation;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Update the allocation display text
+            document.getElementById('allocationDisplay').textContent = 
+                `Space: ${(spaceAllocation * 100).toFixed(0)}% | Time: ${(timeAllocation * 100).toFixed(0)}%`;
+        }
+        
+        // Set active preset button
+        function setActivePreset(presetId) {
+            // Remove active class from all buttons
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to selected button
+            if (presetId) {
+                document.getElementById(presetId).classList.add('active');
+            }
+        }
+        
+        // Handle window resize
+        function handleResize() {
+            initCanvas();
+        }
+        
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize canvas
+            initCanvas();
+            
+            // Set up slider event
+            const slider = document.getElementById('spaceAllocation');
+            slider.addEventListener('input', function() {
+                spaceAllocation = parseFloat(this.value);
+                drawVisualization();
+                setActivePreset(null); // No preset active when manually adjusted
+            });
+            
+            // Set up preset buttons
+            document.getElementById('stationaryBtn').addEventListener('click', function() {
+                spaceAllocation = 0;
+                slider.value = spaceAllocation;
+                drawVisualization();
+                setActivePreset('stationaryBtn');
+            });
+            
+            document.getElementById('movingBtn').addEventListener('click', function() {
+                spaceAllocation = 0.5;
+                slider.value = spaceAllocation;
+                drawVisualization();
+                setActivePreset('movingBtn');
+            });
+            
+            document.getElementById('photonBtn').addEventListener('click', function() {
+                spaceAllocation = 1;
+                slider.value = spaceAllocation;
+                drawVisualization();
+                setActivePreset('photonBtn');
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', handleResize);
+        });
+    </script>
+</body>
+</html>
