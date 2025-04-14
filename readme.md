@@ -1,4 +1,4 @@
-# Timeless Photons: A New Physics Framework
+# The Timeless Field Theory: A New Physics Framework
 
 ## About Me
 
