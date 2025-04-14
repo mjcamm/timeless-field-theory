@@ -2,7 +2,7 @@
 
 ## About Me
 
-I'm Mitchell Camm, a software engineer with a lifelong passion for physics. I've always enjoyed reading books, and watching verious youtube channels like Veritasium and PBS Space Time.
+I'm Mitchell Camm, a software engineer with a lifelong passion for physics. I've always enjoyed reading books, and watching various youtube channels like Veritasium and PBS Space Time.
 
 I had an idea in March 2025 for a new theory of physics, I think I might be onto something interesting, but I don't know any physicists to help work on it with.
 
@@ -10,19 +10,13 @@ I had an idea in March 2025 for a new theory of physics, I think I might be onto
 
 This repository hosts my developing theory that proposes a fundamentally new way to conceptualize photons and their relationship to time. As someone from outside traditional academic physics, I've chosen an open-source approach to development, and invite collaboration of the core ideas.
 
-### Why Open Source?
-
--Physics theories typically develop through academic channels. But I don't have access / nor time to pursue this through traditional avenues like universities.
-
--I'm very aware of my weaknesses and that I myself can not fully see to its end if there is actually something here. So the open source approach is hopefully a way where various people can contribute their own strengths to make this more robust than I could ever alone.
-
--I welcome any contributions through pull requests, issues, and discussions.
-
 ## The Core Insight
 
-This theory addresses a fundamental conundrum in physics: **How can photons, which don't experience time according to relativity, interact with our time-bound universe?**
+This theory addresses a conundrum: **How are photons, which aren't experiencing time, interacting with our time-bound perspective?**
 
-I propose a framework built around the foundation where photons exist in a genuinely timeless state, with radical implications for our understanding of quantum mechanics and its relationship to classical physics.
+I wish to approach this question from a fresh perspective.
+
+I propose a framework built around the foundation where photons exist in a genuinely timeless state, and a mechanism for which timeless interfaces with a timebound experience.
 
 ## Genesis of the Theory
 
@@ -39,3 +33,11 @@ This apparent contradiction became the foundation for this theory.
 This repository contains my working papers, mathematical formalisms, thought experiments, and potential experimental validations of the theory.
 
 I acknowledge this physics theory is unconventional. But maybe, resolving the deepest paradoxes might require reframing of some of our most basic assumptions.
+
+### Why Open Source?
+
+-Physics theories typically develop through academic channels. But I don't have access / nor time to pursue this through traditional avenues like universities.
+
+-I'm very aware of my weaknesses and that I myself can not fully see to its end if there is actually something here. So the open source approach is hopefully a way where various people can contribute their own strengths to make this more robust than I could ever alone.
+
+-I welcome any contributions through pull requests, issues, and discussions.
